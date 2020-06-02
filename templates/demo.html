@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <link rel="stylesheet" href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css" />
+    <title>地图显示</title>
+
+</head>
+
+<body>
+    <div id="container"></div>
+    <button id="btn1">添加点</button>
+    <button id="btn2">取消添加点</button>
+    <input type="radio" name="func" value="marker">添加Marker
+    <input type="radio" name="func" value="circle">添加Circle
+    <style>
+        html,
+        body,
+        #container {
+            width: 80%;
+            height: 100%;
+        }
+
+        button {
+            display: inline;
+        }
+    </style>
+    <script src="https://webapi.amap.com/maps?v=1.4.15&key=1070e01f2466ca698e5f96d1402a712f"></script>
+    <script src="https://webapi.amap.com/maps?v=1.4.15&key=1070e01f2466ca698e5f96d1402a712f&plugin=AMap.MouseTool"></script>
+    <script>
+        var map = new AMap.Map('container', {
+            resizeEnable: true,
+            center: [121.5036, 30.830677],
+            zoom: 16
+        });
+        var marker = new AMap.Marker({
+            position: [121.5036, 30.830677],
+            icon: './img/mark_r.png',
+        });
+        map.add(marker);
+
+        // function addMarkerClick(e) {
+        //     var lng = e.lnglat.getLng();
+        //     var lat = e.lnglat.getLat();
+        //     var markerClick = new AMap.Marker({
+        //         position: [lng,lat],
+        //     })
+        //     map.add(markerClick);
+        // }
+        // document.querySelector("#btn1").onclick = function(){
+        //     map.on('click',addMarkerClick);
+        // }
+        // document.querySelector('#btn2').onclick = function(){
+        //     map.off('click',addMarkerClick);
+        // }
+
+        // map.plugin(["AMap.MouseTool"], function () {
+        //     var mouseTool = new AMap.MouseTool(map);
+        // });
+        var mouseTool = new AMap.MouseTool(map); 
+        function draw(type) {
+            switch (type) {
+                case 'marker': {
+                    mouseTool.marker();
+                    break;
+                }
+                case 'circle': {
+                    mouseTool.circle({
+                        fillColor: '#00b0ff',
+                        strokeColor: '#80d8ff'
+                    });
+                    break;
+                }
+            }
+        }
+        var radios = document.getElementsByName("func");
+        for (var i = 0; i < radios.length; i += 1) {
+            radios[i].onchange = function (e) {
+                draw(e.target.value);
+            }
+        }
+    </script>
+</body>
+
+</html>

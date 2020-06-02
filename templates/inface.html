@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<head>
+    <title>PyEcustRunner</title>
+    <meta author="thyecust">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no">
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container">
+<div class="row">
+  <h1 class="display-4">PyEcustRunner</h1>
+  <p class="d-flex align-items-center m-2">
+  <!-- Button trigger modal -->
+  <button type="button" class="btn btn-outline-info btn-sm" data-toggle="modal" data-target="#exampleModalCenter">
+    作者
+  </button>
+
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalCenterTitle">Python 程序设计 2020 春作业</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          路径规划算法：李浩宇，龚仁杰<br>
+          前端 & 图像处理 & WEB：田昊宇<br>
+          图像处理 & 机器学习：林菁，曾中良<br>
+        </div>
+        <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  </p>
+</div>
+<div class="row">
+    <div class="col-lg-8">
+        <div id="map-container" class="border"></div>
+    </div>
+    <div class="col-lg-4">
+        <p class="mt-2">
+          <div class="collapse" id="showPath">
+            <div class="card card-body">
+              <label for="pathRange">拖拽工具条，逐步显示路径</label>
+              <input type="range" class="custom-range" id="pathRange">
+            </div>
+          </div>
+          <div class="collapse" id="uploadImg">
+            <div class="input-group">
+              <div class="input-group-prepend">
+                <button class="btn btn-outline-success" type="button" id="inputImgBtn">提交</button>
+              </div>
+              <div class="custom-file">
+                <input type="file" class="custom-file-input" id="inputImg" lang="es">
+                <label class="custom-file-label" for="inputImg" data-browse="浏览" id="inputImgLabel">选择截图</label>
+              </div>
+            </div>
+          </div>
+        </p>
+        <p class="mt-2" id="p-end">
+          <button class="btn btn-primary" id="addEnd">添加终点</button>
+          <button class="btn btn-danger" id="removeEnd">删除终点</button>
+        </p>
+        <p id="p-vias">
+          <button class="btn btn-primary" id="addVia">添加途经点</button>
+          <button class="btn btn-warning" id="removeVia">撤销添加途经点</button>
+          <button class="btn btn-danger mt-1" id="removeAllVias">清空途经点</button>
+        </p>
+        <p id="p-length">
+          <div class="form-group form-check bg-light">
+            <input type="checkbox" class="form-check-input" id="useLength">
+            <label class="form-check-label" for="useLength">规定路径长度</label>
+            <input type="number" class="form-control mt-2" id="length" placeholder="请输入路径长度">
+          </div>
+        </p>
+        <p>
+          <button class="btn btn-success" id="getPath">计算路径</button>
+          <!-- <button class="btn btn-info" id="showPath">逐步显示</button> -->
+          <a class="btn btn-outline-info" data-toggle="collapse" href="#showPath" role="button" id="showPathBtn">
+            逐步显示
+          </a>
+          <a class="btn btn-outline-info" data-toggle="collapse" href="#uploadImg" role="button" id="uploadPathBtn">
+            上传截图
+          </a>
+          
+          <!-- <a class="btn btn-secondary" data-toggle="collapse" href="#show" role="button" aria-expanded="false" aria-controls="collapseExample">
+              显示
+          </a>
+          <a class="btn btn-secondary" data-toggle="collapse" href="#get" role="button" aria-expanded="false" aria-controls="collapseExample">
+            计算
+          </a> -->
+          <div class="collapse" id="show">
+            <div class="card card-body">
+                <div class="btn-group-vertical">
+                <button class="btn btn-secondary" id="showCross">显示路口</button>
+                <button class="btn btn-secondary" id="hideCross">隐藏路口</button>
+                <button class="btn btn-secondary" id="showRoad">显示路</button>
+                <button class="btn btn-secondary" id="hideRoad">隐藏路</button>
+                </div>
+            </div>
+          </div>
+          <div class="collapse" id="get">
+            <div class="card card-body">
+              <div class="btn-group-vertical">
+              <button class="btn btn-secondary" id="getStart">计算起点</button>
+              <button class="btn btn-secondary" id="getEnd">计算终点</button>
+              <button class="btn btn-secondary" id="getVias">计算途经点</button>
+              </div>
+            </div>
+          </div>
+        </p>
+        <div class="alert alert-info" id="alert" role="alert">
+          添加终点并拖拽，自动计算路径。
+        </div>
+        
+        
+        
+    </div>
+</div>
+<div class="row justify-content-end m-2">
+  
+</div>
+</div>
+<style>
+    #map-container {
+        width: 100%;
+        height: 400px;
+    }
+</style>
+<script src="../static/js/jquery.min.js"></script>
+<script src="../static/js/bootstrap.bundle.min.js"></script>
+<script src = 'https://webapi.amap.com/maps?v=2.0&key=1070e01f2466ca698e5f96d1402a712f&plugin=AMap.PolygonEditor'></script>
+<script type="text/javascript" >
+
+    var map = new AMap.Map('map-container', {
+        center: [121.5036, 30.830677],
+        zoom: 16
+    })
+
+    map.on('complete',function() {
+      document.querySelector('#getStart').click();
+      document.querySelector('#hideRoad').click();
+    })
+
+    // 创建 Icon
+    var startIcon = new AMap.Icon({
+        // 图标尺寸
+        size: new AMap.Size(25, 34),
+        // 图标的取图地址
+        image: './img/dir-marker.png',
+        // 图标所用图片大小
+        imageSize: new AMap.Size(135, 40),
+        // 图标取图偏移量
+        imageOffset: new AMap.Pixel(-9, -3)
+    });
+
+    var viaIcon = new AMap.Icon({
+        size: new AMap.Size(25, 34),
+        image: './img/dir-marker.png',
+        imageSize: new AMap.Size(135, 40),
+        imageOffset: new AMap.Pixel(-52, -3)
+    });
+
+    var endIcon = new AMap.Icon({
+        size: new AMap.Size(25, 34),
+        image: './img/dir-marker.png',
+        imageSize: new AMap.Size(135, 40),
+        imageOffset: new AMap.Pixel(-95, -3)
+    });
+
+
+    var marker = new AMap.Marker({
+        map: map,
+        position: [121.5036, 30.830677],
+        draggable: true,
+        icon: startIcon,
+        offset: new AMap.Pixel(-13, -30)
+    });
+
+    marker.on('dragend', function() {
+      console.log(String(marker.getPosition()));
+      document.querySelector('#getStart').onclick();
+      getPath();
+    });
+
+    var marker2 = new AMap.Marker({
+      position: [121.501506,30.831964],
+      draggable: true,
+      icon: endIcon,
+      offset: new AMap.Pixel(-13, -30)
+    });
+
+    marker2.on('dragend', function() {
+      document.querySelector('#getEnd').onclick();
+      getPath();
+    });
+
+    var marker3 = new AMap.Marker({
+      map:map,
+      icon: "https://webapi.amap.com/theme/v1.3/markers/n/mark_r.png",
+      visible: false,
+      offset:new AMap.Pixel(-9,-31),
+      position: marker.getPosition(),
+    });
+
+
+    // 显示和隐藏路口
+    var cross = [];
+    var road = [];
+    var roadCross = [];
+    var start = [];
+    var end = [];
+    var viasMarker = [];
+    var vias = [];
+    var viaPath = [];
+    var pathi = 0;
+
+    window.onload = function() {
+      ajax('GET','/cross',function(res) {
+        data = JSON.parse(res);
+        for (var i=0; i<data['record'].length; i++){
+          var crossMarker = new AMap.Marker({
+            map: map,
+            visible: false,
+            position: [data['record'][i][1], data['record'][i][2]]
+          });
+          cross.push(crossMarker);
+        }
+      });
+
+      ajax('GET','/graph',function(res) {
+        data = JSON.parse(res);
+        for (var i=0; i<data['adj'].length; i++){
+          for (var j=1; j<data['adj'][i].length; j++){
+            var path = [
+              getLngLatById(cross,i),
+              getLngLatById(cross,data['adj'][i][j][0])
+            ];
+            var RoadPolyline = new AMap.Polyline({
+              path: path
+            });
+            road.push(RoadPolyline);
+            roadCross.push([i,data['adj'][i][j][0]]);
+          }
+        }
+        map.add(road);
+      })
+      
+      
+    }
+
+    document.querySelector("#showCross").onclick = function() {
+      for (var i=0; i<cross.length; i++){
+        cross[i].show();
+      }
+    }
+
+    document.querySelector("#hideCross").onclick = function() {
+      for (var i=0; i<cross.length; i++){
+        cross[i].hide();
+      }
+    }
+
+    document.querySelector("#showRoad").onclick = function() {
+      for (var i=0; i<road.length; i++){
+        road[i].show();
+      }
+    }
+
+    document.querySelector("#hideRoad").onclick = function() {
+      for (var i=0; i<road.length; i++){
+        road[i].hide();
+      }
+    }
+
+
+    document.querySelector('#addEnd').onclick = function() {
+      marker2.remove();
+      marker2.add(map);
+      map.setFitView([marker,marker2]);
+    }
+    document.querySelector('#removeEnd').onclick = function() {
+      marker2.remove();
+      if(viaPath.length){
+        viaPath[0].hide();
+      }
+      document.querySelector('#alert').innerText = '添加终点并拖拽，自动计算路径。';
+      pathi = 0;
+      marker3.hide();
+    }
+    
+    document.querySelector("#getStart").onclick = function() {
+      getPoint(start,marker);
+    }
+    document.querySelector('#getEnd').onclick = function() {
+      getPoint(end,marker2);
+    }
+    document.querySelector('#getVias').onclick = function() {
+      for(var i=0; i<viasMarker.length; i++){
+        getPoint(vias[i],viasMarker[i]);
+      }
+    }
+    document.querySelector('#getPath').onclick = function() {
+      getPath();
+    }
+    
+    document.querySelector('#addVia').onclick = function() {
+      map.on('click', addVia);
+    }
+
+    document.querySelector('#removeVia').onclick = function() {
+      viasMarker.pop().remove();
+      vias.pop();
+    }
+
+    document.querySelector('#removeAllVias').onclick = function() {
+      var num = viasMarker.length;
+      for(var i=0; i<num; i++){
+        viasMarker.pop().remove();
+        vias.pop();
+      }
+      if(viaPath.length){
+        viaPath[0].hide();
+      }
+      document.querySelector('#alert').innerText = '添加终点并拖拽，自动计算路径。';
+      pathi = 0;
+      marker3.hide();
+    }
+
+    document.querySelector('#showPathBtn').onclick = function() {
+      if (marker3.getVisible()) {
+        marker3.hide();
+        $('#showPath').collapse('hide');
+      } else {
+        marker3.show();
+        $('#showPath').collapse('show');
+      }
+    }
+    function showPathCollapse() {
+      document.querySelector('#pathRange').setAttribute('min',0);
+      document.querySelector('#pathRange').setAttribute('max',viaPath[0].getPath().length);
+    }
+    function hidePathCollapse() {
+    }
+    $('#showPath').on('show.bs.collapse', showPathCollapse);
+    $('#showPath').on('show.bs.collapse', hidePathCollapse);
+    document.querySelector('#pathRange').onchange = function(){
+      pathi = document.querySelector('#pathRange').value;
+      marker3.setPosition(viaPath[0].getPath()[pathi]);
+    };
+
+    document.querySelector('#inputImg').onchange = function() {
+      document.querySelector('#inputImgLabel').innerText = "已选择图片";
+    }
+    document.querySelector('#inputImgBtn').onclick = function() {
+      if(!document.querySelector('#inputImg').files.length){
+        document.querySelector('#alert').innerText = "请先选择文件";
+        return;
+      }
+      var file = document.querySelector('#inputImg').files[0];
+      var imageType = /^image\//;
+      if (!imageType.test(file.type)) {
+        document.querySelector('#alert').innerText = "请上传图片文件";
+        return;
+      }
+      var reader = new FileReader(); 
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST','/upload');
+      xhr.onreadystatechange = function() {
+        if(xhr.readyState==4 && xhr.status==200){
+          str = xhr.responseText;
+          next(str);
+        }
+      }
+      reader.onload = function(e) {
+        xhr.send(e.target.result);
+        document.querySelector('#alert').innerText = "图片处理中...";
+      }
+      reader.readAsDataURL(file);
+      function next(str){
+        data = JSON.parse(str);
+        console.log(data);
+        document.querySelector('#removeAllVias').onclick();
+        document.querySelector('#removeEnd').onclick();
+        for(var i=0; i<data['vias'].length; i++){
+          viaMarker = new AMap.Marker({
+            position: data['vias'][i],
+            map: map,
+            icon: viaIcon,
+            offset: new AMap.Pixel(-13, -30)
+          });
+          viasMarker.push(viaMarker);
+          vias.push([]);
+        }
+      }
+    }
+
+    // 函数
+    function addVia(e) {
+      viaMarker = new AMap.Marker({
+        position: e.lnglat,
+        map: map,
+        icon: viaIcon,
+        offset: new AMap.Pixel(-13, -30)
+      });
+      viasMarker.push(viaMarker);
+      vias.push([]);
+    }
+
+    function getPoint(list,markeri){
+      if (list.length) {
+        list.pop();
+        list.pop();
+        list.pop().remove();
+      }
+      var pos = markeri.getPosition();
+      var minDist = 1000;
+      var minRoad = -1;
+      for (var i=0; i<road.length; i++){
+        path = road[i].getPath();
+        dist = AMap.GeometryUtil.distanceToLine(pos,path);
+        if (dist<minDist){
+          minDist = dist;
+          minRoad = i;
+        }
+      }
+      var closestPositionOnLine  = AMap.GeometryUtil.closestOnLine(pos,road[minRoad].getPath());
+      var closestMarker = new AMap.Marker({
+          map: map,
+          icon: "https://webapi.amap.com/theme/v1.3/markers/n/mark_r.png",
+          visible: false,
+          offset:new AMap.Pixel(-9,-31),
+          position: new AMap.LngLat(closestPositionOnLine[0], closestPositionOnLine[1])
+      });
+      list.push(closestMarker);
+      list.push(minRoad);
+      list.push(minDist);
+    }
+
+    function getSPathBySE() {
+      var ae = getURLs([start,end])
+      ajax('GET','/path'+'?start=130&end=131&ae='+JSON.stringify(ae),function(res) {
+        if(viaPath.length){
+          viaPath[0].remove();
+          viaPath.pop();
+          document.querySelector('#alert').innerText = '添加终点并拖拽，自动计算路径。';
+          pathi = 0;
+          marker3.hide();
+        }
+
+        data = JSON.parse(res);
+        var path = [];
+        path.push([marker.getPosition().lng,marker.getPosition().lat]);
+        path.push([start[0].getPosition().lng,start[0].getPosition().lat]);
+        
+        for (var i=1; i<data['path'].length-1; i++){
+          path.push(getLngLatById(cross,data['path'][i]));
+        }
+      
+        path.push([end[0].getPosition().lng,end[0].getPosition().lat]);
+        path.push([marker2.getPosition().lng,marker2.getPosition().lat]);
+      
+        var polyline = new AMap.Polyline({
+          path: path,
+          map: map
+        });
+        viaPath.push(polyline);
+        document.querySelector('#alert').innerHTML = '路径长度为' + data['dist'];
+      });
+    }
+
+    function getSPathBySEV() {
+      var ae = getURLs([start,end]);
+      ae = getURLs(vias,ae);
+      var svias = [];
+      for(var i=0; i<vias.length; i++) {
+        svias.push(132+i);
+      }
+      ajax('GET','/path2'+'?start=130&end=131&ae='+JSON.stringify(ae)+'&vias='+JSON.stringify(svias),function(res) {
+        if(viaPath.length){
+          viaPath.pop().remove();
+          document.querySelector('#alert').innerText = '添加终点并拖拽，自动计算路径。';
+          pathi = 0;
+          marker3.hide();
+        }
+
+        function getPosition(i) {
+          if(i<130) {
+            return getLngLatById(cross,i);
+          } else if(i==130) {
+            return [start[0].getPosition().lng,start[0].getPosition().lat];
+          } else if(i==131) {
+            return [end[0].getPosition().lng,end[0].getPosition().lat];
+          } else {
+            return [vias[i-132][0].getPosition().lng,vias[i-132][0].getPosition().lat];            
+          }
+        }
+
+        data = JSON.parse(res);
+        var path = [];
+        path.push([marker.getPosition().lng,marker.getPosition().lat]);
+        for (var i=0; i<data['path'].length; i++){
+          path.push(getPosition(data['path'][i]));
+        }
+        path.push([marker2.getPosition().lng,marker2.getPosition().lat]);
+        var polyline = new AMap.Polyline({
+          path: path,
+          map: map
+        });
+        viaPath.push(polyline);
+        document.querySelector('#alert').innerHTML = '路径长度为'+data['dist'];
+      });
+    }
+
+    function getFPathBySEV() {
+      console.log('helo');
+      var ae = getURLs([start,end]);
+      ae = getURLs(vias,ae);
+      var svias = [];
+      for(var i=0; i<vias.length; i++) {
+        svias.push(132+i);
+      }
+      var url = '/path3?start=130&priority=131&ae='+JSON.stringify(ae)
+                +'&vias='+JSON.stringify(svias)
+                +'&length='+document.querySelector('#length').value;
+      ajax('GET',url,function(res) {
+        if(viaPath.length){
+          viaPath.pop().remove();
+          document.querySelector('#alert').innerText = '添加终点并拖拽，自动计算路径。';
+          pathi=0;
+          marker3.hide();
+        }
+
+        function getPosition(i) {
+          if(i<130) {
+            return getLngLatById(cross,i);
+          } else if(i==130) {
+            return [start[0].getPosition().lng,start[0].getPosition().lat];
+          } else if(i==131) {
+            return [end[0].getPosition().lng,end[0].getPosition().lat];
+          } else {
+            return [vias[i-132][0].getPosition().lng,vias[i-132][0].getPosition().lat];            
+          }
+        }
+
+        data = JSON.parse(res);
+        var path = [];
+        path.push([marker.getPosition().lng,marker.getPosition().lat]);
+        for (var i=0; i<data['path'].length; i++){
+          path.push(getPosition(data['path'][i]));
+        }
+        var polyline = new AMap.Polyline({
+          path: path,
+          map: map
+        });
+        viaPath.push(polyline);
+        document.querySelector('#alert').innerHTML = '路径长度为'+data['dist'];
+      });
+    }
+    function getPath() {
+      document.querySelector('#alert').innerText = '路径计算中...';
+      document.querySelector('#getStart').onclick();
+      document.querySelector('#getEnd').onclick();
+      document.querySelector('#getVias').onclick();
+      if(document.querySelector('#useLength').checked){
+        if(!document.querySelector('#length').value) {
+          document.querySelector('#alert').innerText = '请输入路径长度';
+        } else {
+          getFPathBySEV();
+        }
+      } else if(vias.length) {
+        getSPathBySEV();
+      } else {
+        getSPathBySE();
+      }
+    }
+
+    function getURL(list) {
+      var p1 = roadCross[list[1]][0];
+      var p2 = roadCross[list[1]][1];
+      var d1 = AMap.GeometryUtil.distance(cross[p1].getPosition(),list[0].getPosition());
+      var d2 = AMap.GeometryUtil.distance(cross[p2].getPosition(),list[0].getPosition());
+      return [p1,p2,Math.round(d1),Math.round(d2)];
+    }
+    function getURLs(lists,urls=[]) {
+      for(var i=0; i<lists.length; i++){
+        urls.push(getURL(lists[i]));
+      }
+      return urls;
+    }
+    function ajax(method, url, next) {
+      var xhr = new XMLHttpRequest();
+      xhr.open(method,url);
+      xhr.onreadystatechange = function() {
+        if(xhr.readyState==4 && xhr.status==200){
+          str = xhr.responseText;
+          next(str);
+        }
+      }
+      xhr.send();
+    }
+
+    function getLngLatById(cross,i){
+      return [cross[i].getPosition().lng,cross[i].getPosition().lat];
+    }
+    
+
+</script>
+</body>

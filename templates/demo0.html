@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <style>
+        #map_container {
+            width: 500px;
+            height: 400px;
+        }
+    </style>
+</head>
+
+<h1>PyEcustRunner</h1>
+
+<div class="container m-3">
+    <div class="row">
+        <div class="col-xl-6">
+            <div id="map_container"></div>
+        </div>
+        <div class="col-xl-6">
+            <div class="radio_box">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">增加点</h3>
+                        <div>
+                            <input type="radio" value="start" name="addPoint">
+                            <label class="form-check-label">
+                                增加起点
+                            </label>
+                        </div>
+                        <div>
+                            <input type="radio" value="end" name="addPoint">
+                            <label class="form-check-label">
+                                增加终点
+                            </label>
+                        </div>
+                        <div>
+                            <input type="radio" value="via" name="addPoint">
+                            <label class="form-check-label">
+                                增加途经点
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="m-3">
+                <button type="button" class="btn btn-success">计算路径</button>
+                <button type="button" class="btn btn-danger">清空屏幕</button>
+                <button type="button" class="btn btn-info">显示路径点</button>
+                <button type="button" class="btn btn-secondary">隐藏路径点</button>
+            </div>
+            <div closs="footer"></div>
+        </div>
+    </div>
+</div>
+
+<script src="https://webapi.amap.com/maps?v=1.4.15&key=1070e01f2466ca698e5f96d1402a712f"></script>
+<script>
+    var map = new AMap.Map('map_container', {
+        resizeEnable: true,
+        center: [121.5036, 30.830677],
+        zoom: 16
+    });
+</script>
+
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.bundle.min.js"></script>
+
+</html>
